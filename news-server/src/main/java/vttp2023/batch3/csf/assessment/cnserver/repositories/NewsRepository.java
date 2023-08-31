@@ -90,6 +90,21 @@ public class NewsRepository {
 
 	// TODO: Task 3
 	// Write the native Mongo query in the comment above the method
+	/*db.news.aggregate([
+        {$match : {"date": {$gte: 5},
+					"tags": {$in:["123"]}}},
+        {$sort: 
+            {date: -1}
+        }
+	]) */
+	public List<Document> getNews(long interval, String tag) {
+		MatchOperation matchOp = Aggregation.match(Criteria.where(F_DATE).gte((System.currentTimeMillis()-interval)).and(F_TAGS).in(tag));
+		SortOperation sortOp = Aggregation.sort(Direction.DESC, F_DATE);
 
+		Aggregation aggregation = Aggregation.newAggregation(matchOp, sortOp);
+		List<Document> results = mongoTemplate.aggregate(aggregation, C_NEWS, Document.class).getMappedResults();
+
+		return results;
+	}
 
 }

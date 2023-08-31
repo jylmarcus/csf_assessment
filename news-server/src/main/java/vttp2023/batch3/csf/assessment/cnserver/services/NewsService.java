@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,7 +33,7 @@ public class NewsService {
 	// Returns the news id
 	public String postNews(MultipartFile image, String title, String description, String photo, String tags) {
 
-		String imgUrl = imgRepo.uploadImage(photo, image);
+		String imgUrl = imgRepo.uploadImage(title, image);
 
 		News news = new News();
 		news.setTitle(title);
@@ -49,24 +50,30 @@ public class NewsService {
 	// Do not change the method name and the return type
 	// You may add any number of parameters
 	// Returns a list of tags and their associated count
-	public JsonArray getTags(Integer interval) {
+	public List<TagCount> getTags(Integer interval) {
 		long intervalInMillis = interval * 60000L;
-		List<TagCount> tagsInInterval = newsRepo.getTags(intervalInMillis);
-		JsonArrayBuilder tagsArrayBuilder = Json.createArrayBuilder();
-		for(TagCount tagCount : tagsInInterval) {
-			JsonObject obj = Json.createObjectBuilder().add("tag", tagCount.tag()).add("count", tagCount.count()).build();
-			tagsArrayBuilder.add(obj);
-		}
-		JsonArray tagsArray = tagsArrayBuilder.build();
-		return tagsArray;
+		return newsRepo.getTags(intervalInMillis);
 	}
 
 	// TODO: Task 3
 	// Do not change the method name and the return type
 	// You may add any number of parameters
 	// Returns a list of news
-	public List<News> getNewsByTag(/* Any number of parameters */) {
-		return new LinkedList<>();
+	public List<News> getNewsByTag(Integer interval, String tag) {
+		long intervalInMillis = interval * 60000L;
+		List<Document> results = newsRepo.getNews(intervalInMillis, tag);
+		List<News> newsResults = new LinkedList<>();
+		for(Document doc: results) {
+			News news = new News();
+			news.setTitle(doc.getString("title"));
+			news.setDescription(doc.getString("description"));
+			news.setId(doc.get("_id").toString());
+			news.setPostDate(doc.getLong("date"));
+			news.setTags(doc.getList("tags", String.class));
+			news.setImage(imgRepo.getImageUrl(news.getTitle()));
+			newsResults.add(news);
+		}
+		return newsResults;
 	}
 	
 }
