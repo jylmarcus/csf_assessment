@@ -1,0 +1,10 @@
+<label for="time">Time</label>
+<select name="time" id="" (change)="changeInterval($event)">
+  <option *ngFor="let interval of intervals" [value]="interval">{{interval}}</option>
+</select>
+<button type="button" (click)="goShareNews()">Post News</button>
+<h2>Top Tags</h2>
+<ul>
+  <li *ngFor="let tag of tags">{{tag.tag}} ({{tag.count}})</li>
+  <li *ngIf="tags == null">No news hashtags found within the last {{currentInterval}} minutes</li>
+</ul>

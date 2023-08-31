@@ -2,7 +2,7 @@ import { News } from './../../models/news';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators} from '@angular/forms';
 import { Location } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { NewsService } from 'src/app/services/news.service';
 
 @Component({
@@ -48,20 +48,23 @@ export class ShareNewsComponent implements OnInit{
 
     data.append("image", this.photo);
 
-    try {
-      this.newsSvc.uploadNews(data).then(resp => {
-        this.shareNewsId=resp;
-        alert(`ID of posted news: ${this.shareNewsId}`);
-        this.router.navigate([''])
-      });
-    } catch(err: any) {
-      alert(err.message);
-    }
+    this.newsSvc.uploadNews(data).subscribe({
+        next: (resp) => {
+        this.shareNewsId=resp.newsId;
+        alert(this.shareNewsId);
+        //alert(`ID of posted news: ${this.shareNewsId}`);
+        this.router.navigate(['searchNews'])
+      },
+        error: (err) => {
+          alert(err);
+        }
+    });
   }
 
   addTags(addedTags: any) {
     let newTags = addedTags.split(' ');
     this.tags = [...this.tags, ...newTags];
+    this.tags = this.tags.filter(tag => tag !== '')
   }
 
   removeTag(event: any) {
@@ -74,6 +77,7 @@ export class ShareNewsComponent implements OnInit{
   }
 
   goBack() {
-    this.location.back();
+    let previousInterval: Number = this.activatedRoute.snapshot.params['interval']
+    this.router.navigate(['searchNews', {interval: previousInterval ? previousInterval : 5}]);
   }
 }
