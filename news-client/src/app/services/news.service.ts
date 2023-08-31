@@ -11,6 +11,6 @@ export class NewsService {
 
   uploadNews(data: FormData) {
 
-    firstValueFrom(this.http.post<any>(`http://localhost:8080/postNews`, data));
+    return firstValueFrom(this.http.post<any>(`http://localhost:8080/postNews`, data));
   }
 }

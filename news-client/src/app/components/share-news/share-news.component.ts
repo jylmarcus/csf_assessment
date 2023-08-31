@@ -2,7 +2,7 @@ import { News } from './../../models/news';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators} from '@angular/forms';
 import { Location } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NewsService } from 'src/app/services/news.service';
 
 @Component({
@@ -15,15 +15,16 @@ export class ShareNewsComponent implements OnInit{
   shareNewsForm!: FormGroup;
   tags: string[] = [];
   photo!: File;
+  shareNewsId!: String;
 
-  constructor(private fb: FormBuilder, private location: Location, private activatedRoute: ActivatedRoute, private newsSvc: NewsService) {}
+  constructor(private fb: FormBuilder, private location: Location, private activatedRoute: ActivatedRoute, private newsSvc: NewsService, private router: Router) {}
 
   ngOnInit(): void {
     this.shareNewsForm = this.fb.group(
       {
-        title: this.fb.control<string>(`<newsTitle>`, [Validators.required, Validators.minLength(5)]),
+        title: this.fb.control<string>(``, [Validators.required, Validators.minLength(5)]),
         photo: this.fb.control<string>(``,[Validators.required]),
-        description: this.fb.control<string>(`<description>`, [Validators.required, Validators.minLength(5)]),
+        description: this.fb.control<string>(``, [Validators.required, Validators.minLength(5)]),
       }
     )
   }
@@ -47,7 +48,15 @@ export class ShareNewsComponent implements OnInit{
 
     data.append("image", this.photo);
 
-    this.newsSvc.uploadNews(data)
+    try {
+      this.newsSvc.uploadNews(data).then(resp => {
+        this.shareNewsId=resp;
+        alert(`ID of posted news: ${this.shareNewsId}`);
+        this.router.navigate([''])
+      });
+    } catch(err: any) {
+      alert(err.message);
+    }
   }
 
   addTags(addedTags: any) {
@@ -62,5 +71,9 @@ export class ShareNewsComponent implements OnInit{
   onFileChange(event: any) {
     this.photo = event.target.files[0];
     this.shareNewsForm.controls['photo'].setValue(this.photo ? this.photo.name : '');
+  }
+
+  goBack() {
+    this.location.back();
   }
 }

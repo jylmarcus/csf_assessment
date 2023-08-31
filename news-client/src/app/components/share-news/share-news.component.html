@@ -18,6 +18,6 @@
   <button type="button" (click)="addTags(insertTags.value)">+</button>
   <button type="button" (click)="removeTag($event)" name="{{tag}}" *ngFor="let tag of tags">{{tag}}</button>
 
-  <button type="button">Back</button>
-  <button type="submit">Post News</button>
+  <button type="button" (click)="goBack()">Back</button>
+  <button type="submit" [disabled]="shareNewsForm.invalid">Post News</button>
 </form>
